@@ -1,0 +1,427 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --res-bg: var(--bg-main, #0b0f17);
+  --res-surface: var(--bg-container, #141a26);
+  --res-surface-border: var(--border-color, rgba(255, 255, 255, 0.12));
+  --res-primary: #f59e0b;
+  --res-primary-hover: #d97706;
+  --res-text: var(--text-main, #f8fafc);
+  --res-text-muted: var(--text-muted, #94a3b8);
+  --res-card-bg: var(--card-bg, rgba(20, 26, 38, 0.85));
+  --res-radius: 16px;
+  --res-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base Wrapper Fixes */
+.modern-res-wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: visible;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  padding: 1.5rem 1rem 3rem 1rem;
+  box-sizing: border-box;
+}
+
+/* Background Glow Orbs */
+.res-ambient-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.blur-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.15;
+}
+
+.orb-1 {
+  top: -10%;
+  left: -10%;
+  width: 500px;
+  height: 500px;
+  background: var(--res-primary);
+}
+
+.orb-2 {
+  bottom: -10%;
+  right: -5%;
+  width: 400px;
+  height: 400px;
+  background: #6366f1;
+}
+
+/* Layout Container */
+.res-page-container {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+.res-page-header {
+  text-align: center;
+  max-width: 560px;
+  margin: 0 auto 1.5rem auto;
+}
+
+.res-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--res-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  margin-bottom: 0.5rem;
+}
+
+.res-page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-bottom: 0.35rem;
+  color: #ffffff !important;
+}
+
+.res-page-subtitle {
+  color: var(--res-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Grid Layout */
+.res-split-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 992px) {
+  .res-split-layout {
+    grid-template-columns: 1.4fr 0.9fr;
+    align-items: start;
+  }
+}
+
+/* Form Container */
+.booking-form-box,
+.booking-success-card {
+  background: var(--res-card-bg);
+  /* backdrop-filter: blur(16px); */
+  border: 1px solid var(--res-surface-border);
+  border-radius: var(--res-radius);
+  padding: 2rem;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+}
+
+.form-legend {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #ffffff !important;
+}
+
+.form-error-box {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.res-card-glass {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border-color);
+  border-radius: var(--res-radius);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-md);
+}
+
+.res-page-title {
+  color: var(--text-main) !important;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main) !important;
+  margin-bottom: 0.5rem;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 540px) {
+  .form-row-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  color: var(--text-muted);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Inputs & Date Picker Fixes */
+.input-with-icon input,
+.input-with-icon select {
+  width: 100%;
+  padding: 0.85rem 1rem 0.85rem 2.8rem;
+  background: var(--bg-main) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--text-main) !important;
+  font-size: 0.95rem;
+  outline: none;
+  transition: var(--res-transition);
+}
+
+/* Select Option Dropdown Fix */
+.input-with-icon select option {
+  background-color: var(--bg-main) !important;
+  color: var(--text-main) !important;
+}
+
+.input-with-icon input:focus,
+.input-with-icon select:focus {
+  border-color: var(--res-primary);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+}
+
+/* Zone Card Selector */
+.zone-selector-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .zone-selector-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.zone-card {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: var(--res-transition);
+}
+
+.zone-card:hover {
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.zone-card.active {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: var(--res-primary);
+  box-shadow: 0 0 0 1px var(--res-primary);
+}
+
+.zone-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.zone-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-main) !important;
+}
+
+.zone-badge {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: var(--border-color);
+  color: var(--text-muted);
+}
+
+.zone-card.active .zone-badge {
+  background: var(--res-primary);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.zone-desc {
+  font-size: 0.775rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Submit Button */
+.booking-submit-btn {
+  width: 100%;
+  padding: 1rem;
+  margin-top: 1rem;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border: none;
+  border-radius: 10px;
+  color: #ffffff !important;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: var(--res-transition);
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+}
+
+.booking-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+}
+
+/* Live Pass Card Preview */
+.live-ticket-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--res-radius);
+  padding: 1.75rem;
+  position: relative;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 1.5rem;
+}
+
+.ticket-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed var(--border-color);
+  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.ticket-card-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main) !important;
+}
+
+.preview-field span {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.2rem;
+}
+
+.preview-field h6 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main) !important;
+}
+
+.preview-field h6.highlight-text {
+  color: var(--res-primary) !important;
+}
+
+.preview-row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Guarantees Box */
+.guarantee-box {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--res-radius);
+  padding: 1.5rem;
+}
+
+.guarantee-item strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-main) !important;
+}
+
+.guarantee-item p {
+  margin: 0.2rem 0 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Success Card */
+.booking-success-card {
+  text-align: center;
+}
+
+.booking-success-card h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-main) !important;
+  margin-bottom: 0.4rem;
+}
+
+.ticket-row .label {
+  color: var(--text-muted);
+}
+
+.ticket-row .value {
+  font-weight: 600;
+  color: var(--text-main) !important;
+}
+
+.booking-reset-btn {
+  width: 100%;
+  padding: 0.85rem;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main) !important;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--res-transition);
+}
+
+.booking-reset-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
