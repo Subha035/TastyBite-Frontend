@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, 
-  Star, 
-  Sparkles, 
-  Plus, 
-  Leaf, 
-  Drumstick, 
-  X, 
-  Check, 
-  Loader2, 
+import {
+  Search,
+  Star,
+  Sparkles,
+  Plus,
+  Leaf,
+  Drumstick,
+  X,
+  Check,
+  Loader2,
   ShoppingBag,
   Info
 } from 'lucide-react';
 import { getMenuItems, createMenuItem, logActivity } from '../services/apiService';
 import './MenuSection.css';
 
-const MenuSection = ({ setActiveTab, handleSendMessage }) => {
+const MenuSection = ({ setActiveTab, handleSendMessage, onOrderDish }) => {
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -58,8 +58,8 @@ const MenuSection = ({ setActiveTab, handleSendMessage }) => {
           const text = ((item.title || '') + ' ' + (item.category || '')).toLowerCase();
           const isNonVegKeyword = text.includes('chicken') || text.includes('mutton') || text.includes('meat') || text.includes('egg') || text.includes('fish') || text.includes('prawn') || text.includes('pepperoni') || text.includes('bacon');
           const itemIsVeg = item.isVeg !== undefined && item.isVeg !== null ? Boolean(item.isVeg) : !isNonVegKeyword;
-          const itemAvailable = item.available !== undefined && item.available !== null 
-            ? Boolean(item.available) 
+          const itemAvailable = item.available !== undefined && item.available !== null
+            ? Boolean(item.available)
             : (item.isAvailable !== undefined && item.isAvailable !== null ? Boolean(item.isAvailable) : true);
 
           return {
@@ -164,8 +164,8 @@ const MenuSection = ({ setActiveTab, handleSendMessage }) => {
   // Filter by category and search query
   const filteredItems = menuItems.filter(item => {
     const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.desc.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.desc.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -188,9 +188,9 @@ const MenuSection = ({ setActiveTab, handleSendMessage }) => {
         <div className="header-actions-group">
           <div className="menu-search-bar">
             <Search className="search-icon" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search dishes, ingredients..." 
+            <input
+              type="text"
+              placeholder="Search dishes, ingredients..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -201,20 +201,9 @@ const MenuSection = ({ setActiveTab, handleSendMessage }) => {
             )}
           </div>
 
-          {/* <button 
-            className="add-food-btn"
-            onClick={() => {
-              setErrorMsg('');
-              setIsAddModalOpen(true);
-            }}
-          >
-            <Plus size={18} />
-            <span>Add Food Item</span> */}
-          {/* </button> */}
+
         </div>
       </div>
-
-      {/* Category Pills Panel */}
       <div className="menu-category-panel">
         <div className="menu-category-header">
           <div>
@@ -249,15 +238,17 @@ const MenuSection = ({ setActiveTab, handleSendMessage }) => {
         <div className="menu-dishes-grid">
           {filteredItems.length > 0 ? (
             filteredItems.map(item => (
-              <div key={item.id} className="menu-dish-card">
+              <div key={item.id} className={`menu-dish-card ${!item.available ? 'dish-unavailable' : ''}`}>
                 <div className="dish-img-container">
-                  <img 
-                    src={item.image} 
-                    alt={item.title} 
+                  <img
+                    src={item.image}
+                    alt={item.title}
                     className="dish-img"
+                    loading="lazy"
+                    decoding="async"
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = '/margherita_pizza.png';
+                      e.target.style.opacity = '0.5';
                     }}
                   />
                   <div className={`dish-badge ${item.isVeg ? 'veg' : 'non-veg'}`}>
@@ -276,15 +267,15 @@ const MenuSection = ({ setActiveTab, handleSendMessage }) => {
                     <span className="dish-price">{item.price}</span>
                   </div>
                   <p className="dish-description">{item.desc || 'No description provided.'}</p>
-                  
+
                   <div className="dish-footer-row">
                     <div className="dish-rating">
                       <Star size={14} className="star-filled" />
                       <span>{item.rating}</span>
                     </div>
-                    
+
                     <div className="dish-action-buttons">
-                      <button 
+                      <button
                         className="dish-ask-ai-btn"
                         onClick={() => handleAskAI(item.title)}
                         title="Ask AI chatbot about ingredients or customization"
@@ -292,11 +283,20 @@ const MenuSection = ({ setActiveTab, handleSendMessage }) => {
                         <Sparkles size={13} />
                         Ask AI
                       </button>
-                      <button 
-                        className="dish-order-now-btn"
-                        onClick={() => setActiveTab && setActiveTab('place-order')}
+                      <button
+                        className={`dish-order-now-btn ${!item.available ? 'dish-btn-disabled' : ''}`}
+                        onClick={() => {
+                          if (!item.available) return;
+                          if (onOrderDish) {
+                            onOrderDish(item);
+                          } else if (setActiveTab) {
+                            setActiveTab('place-order');
+                          }
+                        }}
+                        disabled={!item.available}
+                        title={item.available ? `Order 1 ${item.title}` : 'Currently unavailable'}
                       >
-                        Order Now
+                        {item.available ? 'Order Now' : 'Unavailable'}
                       </button>
                     </div>
                   </div>
@@ -322,8 +322,8 @@ const MenuSection = ({ setActiveTab, handleSendMessage }) => {
                 <h2>Add New Food Item</h2>
                 <p>Item will be stored in database and rendered automatically across the menu.</p>
               </div>
-              <button 
-                className="modal-close-btn" 
+              <button
+                className="modal-close-btn"
                 onClick={() => setIsAddModalOpen(false)}
                 disabled={isSubmitting}
               >
@@ -350,9 +350,9 @@ const MenuSection = ({ setActiveTab, handleSendMessage }) => {
               <form onSubmit={handleAddSubmit} className="add-food-form">
                 <div className="form-group">
                   <label>Food Item Title *</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. Deluxe Paneer Wrap" 
+                  <input
+                    type="text"
+                    placeholder="e.g. Deluxe Paneer Wrap"
                     value={form.title}
                     onChange={(e) => handleFormChange('title', e.target.value)}
                     required
@@ -362,7 +362,7 @@ const MenuSection = ({ setActiveTab, handleSendMessage }) => {
                 <div className="form-row">
                   <div className="form-group">
                     <label>Category *</label>
-                    <select 
+                    <select
                       value={form.category}
                       onChange={(e) => handleFormChange('category', e.target.value)}
                     >
@@ -376,10 +376,10 @@ const MenuSection = ({ setActiveTab, handleSendMessage }) => {
 
                   <div className="form-group">
                     <label>Price (₹) *</label>
-                    <input 
+                    <input
                       type="number"
                       step="0.01"
-                      placeholder="e.g. 249" 
+                      placeholder="e.g. 249"
                       value={form.price}
                       onChange={(e) => handleFormChange('price', e.target.value)}
                       required
@@ -431,9 +431,9 @@ const MenuSection = ({ setActiveTab, handleSendMessage }) => {
 
                 <div className="form-group">
                   <label>Image URL (Optional)</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. https://images.unsplash.com/... or /veg_supreme_pizza.png" 
+                  <input
+                    type="text"
+                    placeholder="e.g. https://images.unsplash.com/... or /veg_supreme_pizza.png"
                     value={form.image}
                     onChange={(e) => handleFormChange('image', e.target.value)}
                   />
@@ -441,25 +441,25 @@ const MenuSection = ({ setActiveTab, handleSendMessage }) => {
 
                 <div className="form-group">
                   <label>Description</label>
-                  <textarea 
+                  <textarea
                     rows={3}
-                    placeholder="Briefly describe the key ingredients, taste, or serving size..."
+                    placeholder="Briefly describe the key ingredients, taste or serving size..."
                     value={form.desc}
                     onChange={(e) => handleFormChange('desc', e.target.value)}
                   />
                 </div>
 
                 <div className="modal-footer">
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="cancel-btn"
                     onClick={() => setIsAddModalOpen(false)}
                     disabled={isSubmitting}
                   >
                     Cancel
                   </button>
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className="submit-btn"
                     disabled={isSubmitting}
                   >

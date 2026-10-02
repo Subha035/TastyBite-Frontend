@@ -11,11 +11,10 @@ import {
   Sun,
   Settings2,
   ArrowUpRight,
-  LogIn,
-  LogOut
+  X
 } from 'lucide-react';
 
-const Sidebar = ({ activeTab, setActiveTab, darkMode, setDarkMode, currentUser, onOpenAuthModal, onLogout }) => {
+const Sidebar = ({ activeTab, setActiveTab, darkMode, setDarkMode, isMobileOpen, onClose }) => {
   const menuItems = [
     { id: 'new-chat', label: 'New Chat', icon: MessageSquare, isButton: true },
     { id: 'home', label: 'Home', icon: Home },
@@ -26,54 +25,41 @@ const Sidebar = ({ activeTab, setActiveTab, darkMode, setDarkMode, currentUser, 
     { id: 'contact-us', label: 'Contact Us', icon: Phone }
   ];
 
+  const handleNavClick = (tabId) => {
+    setActiveTab(tabId);
+    if (onClose) onClose();
+  };
+
   return (
-    <aside className="left-sidebar">
+    <aside className={`left-sidebar ${isMobileOpen ? 'mobile-open' : ''}`}>
       <div>
         {/* Brand Header */}
         <div className="sidebar-header">
-          <div className="logo-icon">
-            <svg 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <path d="M6 18V9a6 6 0 0 1 12 0v9" />
-              <path d="M3 18h18a1 1 0 0 1 1 1v2H2v-2a1 1 0 0 1 1-1Z" />
-              <path d="M12 2v3" />
-            </svg>
-          </div>
-          <div className="brand-details">
-            <span className="brand-name">TastyBite</span>
-            <span className="brand-subtitle">AI Assistant</span>
-          </div>
-        </div>
-
-        {/* User Auth Profile Badge */}
-        <div className="sidebar-user-badge">
-          {currentUser ? (
-            <div className="user-profile-info">
-              <img
-                src={currentUser.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + currentUser.email}
-                alt={currentUser.name}
-                className="user-avatar-img"
-              />
-              <div className="user-text-meta">
-                <span className="user-display-name">{currentUser.name}</span>
-                <span className="user-display-email">{currentUser.email}</span>
-              </div>
-              <button className="user-logout-icon-btn" onClick={onLogout} title="Log Out">
-                <LogOut size={16} />
-              </button>
+          <div className="sidebar-brand-group">
+            <div className="logo-icon">
+              <svg 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <path d="M6 18V9a6 6 0 0 1 12 0v9" />
+                <path d="M3 18h18a1 1 0 0 1 1 1v2H2v-2a1 1 0 0 1 1-1Z" />
+                <path d="M12 2v3" />
+              </svg>
             </div>
-          ) : (
-            <button className="sidebar-login-trigger-btn" onClick={onOpenAuthModal}>
-              <LogIn size={16} />
-              <span>Log In / Sign Up</span>
+            <div className="brand-details">
+              <span className="brand-name">TastyBite</span>
+              <span className="brand-subtitle">AI Assistant</span>
+            </div>
+          </div>
+          {onClose && (
+            <button className="sidebar-mobile-close-btn" onClick={onClose} aria-label="Close menu">
+              <X size={20} />
             </button>
           )}
         </div>
@@ -89,7 +75,7 @@ const Sidebar = ({ activeTab, setActiveTab, darkMode, setDarkMode, currentUser, 
                 <li key={item.id}>
                   <button 
                     className={`menu-item ${isActive ? 'active' : ''}`}
-                    onClick={() => setActiveTab(item.id)}
+                    onClick={() => handleNavClick(item.id)}
                     style={{ width: '100%', border: 'none', background: isActive ? 'var(--sidebar-active-bg)' : 'transparent', textAlign: 'left' }}
                   >
                     <IconComponent />
@@ -106,7 +92,7 @@ const Sidebar = ({ activeTab, setActiveTab, darkMode, setDarkMode, currentUser, 
                   className={`menu-item ${isActive ? 'active' : ''}`}
                   onClick={(e) => {
                     e.preventDefault();
-                    setActiveTab(item.id);
+                    handleNavClick(item.id);
                   }}
                 >
                   <IconComponent />
@@ -122,19 +108,19 @@ const Sidebar = ({ activeTab, setActiveTab, darkMode, setDarkMode, currentUser, 
         {/* Admin Panel Promo Card */}
         <div className="sidebar-promo-card">
           <div className="promo-text">
-            Access restaurant analytics, management, and controls.
+            Access restaurant analytics, management and controls.
           </div>
-          <button className="promo-btn" onClick={() => setActiveTab('admin-panel')}>
+          <button className="promo-btn" onClick={() => handleNavClick('admin-panel')}>
             Admin Panel
             <ArrowUpRight size={14} />
           </button>
         </div>
 
-        {/* Dark Mode Switch */}
+        {/* Universal Theme Toggle */}
         <div className="dark-mode-toggle">
           <div className="toggle-label">
-            {darkMode ? <Moon size={16} /> : <Sun size={16} />}
-            Dark Mode
+            {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+            {darkMode ? 'Light Mode' : 'Dark Mode'}
           </div>
           <label className="switch">
             <input 

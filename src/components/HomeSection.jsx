@@ -165,7 +165,7 @@ const HomeSection = ({ setActiveTab, handleSendMessage }) => {
             </div>
             <h3 className="ai-teaser-title">Meet Your Personal AI Host</h3>
             <p className="ai-teaser-desc">
-              Have questions about ingredients, allergy warnings, or want to place custom orders? Type them in our AI Assistant chat panel.
+              Have questions about ingredients, allergy warnings or want to place custom orders? Type them in our AI Assistant chat panel.
             </p>
             <button className="ai-chat-start-btn">
               Start Chatting <ChevronRight size={14} />

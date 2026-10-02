@@ -11,41 +11,67 @@ import ReservationsSection from './components/ReservationsSection';
 import ContactSection from './components/ContactSection';
 import AdminPanel from './components/AdminPanel';
 import AdminReservations from './components/AdminReservations';
+import AdminOrders from './components/AdminOrders';
 import PlaceOrder from './components/PlaceOrder';
-import AuthModal from './components/AuthModal';
+import AdminLogin from './components/AdminLogin';
 import { 
   getReservations, 
   updateReservationStatus, 
   deleteReservation as apiDeleteReservation, 
-  sendChatMessage,
-  getStoredUser,
-  getCurrentUser,
-  logoutUser
+  sendChatMessage
 } from './services/apiService';
+import { Menu as MenuIcon, Sun, Moon } from 'lucide-react';
 import './App.css';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('home');
-  const [darkMode, setDarkMode] = useState(false);
-  const [inputMessage, setInputMessage] = useState('');
-  const [currentUser, setCurrentUser] = useState(() => getStoredUser());
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-
-  // Validate logged in user token on mount
-  useEffect(() => {
-    async function checkUserSession() {
-      const user = await getCurrentUser();
-      if (user) {
-        setCurrentUser(user);
-      }
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return (
+        window.localStorage.getItem('tastybite-admin-auth') === 'true' ||
+        window.sessionStorage.getItem('tastybite-admin-auth') === 'true'
+      );
+    } catch {
+      return false;
     }
-    checkUserSession();
-  }, []);
+  });
 
-  const handleLogout = () => {
-    logoutUser();
-    setCurrentUser(null);
+  const handleAdminLoginSuccess = () => {
+    setIsAdminAuthenticated(true);
   };
+
+  const handleAdminLogout = () => {
+    try {
+      window.localStorage.removeItem('tastybite-admin-auth');
+      window.sessionStorage.removeItem('tastybite-admin-auth');
+    } catch {}
+    setIsAdminAuthenticated(false);
+    setActiveTab('home');
+  };
+
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window === 'undefined') return 'home';
+    try {
+      return window.localStorage.getItem('tastybite-active-tab') || 'home';
+    } catch {
+      return 'home';
+    }
+  });
+
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      const stored = window.localStorage.getItem('tastybite-theme');
+      if (stored !== null) {
+        return stored === 'dark';
+      }
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    } catch {
+      return false;
+    }
+  });
+  const [inputMessage, setInputMessage] = useState('');
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [reservations, setReservations] = useState(() => {
     if (typeof window === 'undefined') return [];
     try {
@@ -82,7 +108,7 @@ function App() {
       id: 1,
       sender: 'bot',
       time: '10:30 AM',
-      text: 'Welcome to TastyBite Restaurant! 👋 How can I help you today? You can ask about our menu, current offers, or reservations.',
+      text: 'Welcome to TastyBite Restaurant! 👋 How can I help you today? You can ask about our menu, current offers or reservations.',
       subtext: ''
     }
   ]);
@@ -90,10 +116,23 @@ function App() {
   useEffect(() => {
     if (darkMode) {
       document.documentElement.setAttribute('data-theme', 'dark');
+      try { window.localStorage.setItem('tastybite-theme', 'dark'); } catch {}
     } else {
       document.documentElement.removeAttribute('data-theme');
+      try { window.localStorage.setItem('tastybite-theme', 'light'); } catch {}
     }
   }, [darkMode]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('tastybite-active-tab', activeTab);
+    } catch {}
+    // Scroll content to top whenever tab changes
+    const scrollContainers = document.querySelectorAll('.home-section-container, .menu-section-container, .offers-section-container, .reservations-section-container, .contact-section-container, .main-wrapper');
+    scrollContainers.forEach(el => {
+      if (el) el.scrollTop = 0;
+    });
+  }, [activeTab]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -227,23 +266,66 @@ function App() {
     }, 400);
   };
 
-  const [selectedChatDish, setSelectedChatDish] = useState(null);
+  const [selectedOrderDish, setSelectedOrderDish] = useState(null);
 
-  const handleOrderDishFromChat = (dish) => {
-    setSelectedChatDish(dish);
+  const handleOrderDish = (dish) => {
+    if (!dish) return;
+    // Add unique selectId timestamp so re-selecting triggers PlaceOrder add
+    setSelectedOrderDish({
+      ...dish,
+      _selectId: Date.now()
+    });
     setActiveTab('place-order');
   };
 
   return (
     <div className="app-container">
+      {/* Mobile Top Navigation Header */}
+      <header className="mobile-top-nav">
+        <button 
+          className="mobile-hamburger-btn" 
+          onClick={() => setIsMobileSidebarOpen(true)}
+          aria-label="Open navigation menu"
+        >
+          <MenuIcon size={22} />
+        </button>
+        <div className="mobile-nav-brand" onClick={() => setActiveTab('home')}>
+          <div className="mobile-brand-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 18V9a6 6 0 0 1 12 0v9" />
+              <path d="M3 18h18a1 1 0 0 1 1 1v2H2v-2a1 1 0 0 1 1-1Z" />
+              <path d="M12 2v3" />
+            </svg>
+          </div>
+          <span className="mobile-brand-title">TastyBite</span>
+        </div>
+        <div className="mobile-nav-actions">
+          <button 
+            className="mobile-theme-toggle" 
+            onClick={() => setDarkMode(!darkMode)}
+            aria-label="Toggle dark mode"
+          >
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+        </div>
+      </header>
+
+      {/* Backdrop overlay for mobile drawer */}
+      {isMobileSidebarOpen && (
+        <div 
+          className="mobile-sidebar-backdrop" 
+          onClick={() => setIsMobileSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
         darkMode={darkMode} 
         setDarkMode={setDarkMode} 
-        currentUser={currentUser}
-        onOpenAuthModal={() => setIsAuthModalOpen(true)}
-        onLogout={handleLogout}
+        isMobileOpen={isMobileSidebarOpen}
+        onClose={() => setIsMobileSidebarOpen(false)}
       />
       <main className="main-wrapper">
         {(() => {
@@ -260,6 +342,7 @@ function App() {
                 <MenuSection 
                   setActiveTab={setActiveTab} 
                   handleSendMessage={handleSendMessage} 
+                  onOrderDish={handleOrderDish}
                 />
               );
             case 'offers':
@@ -267,12 +350,32 @@ function App() {
                 <OffersSection />
               );
             case 'offers-manager':
+              if (!isAdminAuthenticated) {
+                return (
+                  <AdminLogin 
+                    onSuccess={handleAdminLoginSuccess} 
+                    onCancel={() => setActiveTab('home')} 
+                  />
+                );
+              }
               return (
-                <OffersManager onBack={() => setActiveTab('admin-panel')} />
+                <OffersManager 
+                  onBack={() => setActiveTab('admin-panel')} 
+                />
               );
             case 'menu-manager':
+              if (!isAdminAuthenticated) {
+                return (
+                  <AdminLogin 
+                    onSuccess={handleAdminLoginSuccess} 
+                    onCancel={() => setActiveTab('home')} 
+                  />
+                );
+              }
               return (
-                <MenuManager onBack={() => setActiveTab('admin-panel')} />
+                <MenuManager 
+                  onBack={() => setActiveTab('admin-panel')} 
+                />
               );
             case 'reservations':
               return (
@@ -286,20 +389,54 @@ function App() {
               return (
                 <PlaceOrder 
                   onBack={() => setActiveTab('menu')} 
-                  preSelectedDish={selectedChatDish} 
+                  preSelectedDish={selectedOrderDish} 
                 />
               );
             case 'admin-panel':
+              if (!isAdminAuthenticated) {
+                return (
+                  <AdminLogin 
+                    onSuccess={handleAdminLoginSuccess} 
+                    onCancel={() => setActiveTab('home')} 
+                  />
+                );
+              }
               return (
-                <AdminPanel setActiveTab={setActiveTab} />
+                <AdminPanel 
+                  setActiveTab={setActiveTab} 
+                  onLogout={handleAdminLogout} 
+                />
               );
             case 'admin-reservations':
+              if (!isAdminAuthenticated) {
+                return (
+                  <AdminLogin 
+                    onSuccess={handleAdminLoginSuccess} 
+                    onCancel={() => setActiveTab('home')} 
+                  />
+                );
+              }
               return (
                 <AdminReservations
                   reservations={reservations}
                   onBack={() => setActiveTab('admin-panel')}
                   onUpdateReservation={handleReservationUpdate}
                   onDeleteReservation={handleReservationDelete}
+                />
+              );
+            case 'admin-orders':
+              if (!isAdminAuthenticated) {
+                return (
+                  <AdminLogin 
+                    onSuccess={handleAdminLoginSuccess} 
+                    onCancel={() => setActiveTab('home')} 
+                  />
+                );
+              }
+              return (
+                <AdminOrders
+                  onBack={() => setActiveTab('admin-panel')}
+                  onLogout={handleAdminLogout}
                 />
               );
             default:
@@ -310,21 +447,18 @@ function App() {
                   setInput={setInputMessage}
                   handleSendMessage={handleSendMessage}
                   isTyping={isBotTyping}
-                  onOrderDish={handleOrderDishFromChat}
+                  onOrderDish={handleOrderDish}
                 />
               );
           }
         })()}
-        {activeTab !== 'place-order' && activeTab !== 'contact-us' && (
+        {activeTab !== 'place-order' && 
+         activeTab !== 'contact-us' && 
+         (!['admin-panel', 'admin-orders', 'admin-reservations', 'menu-manager', 'offers-manager'].includes(activeTab) || isAdminAuthenticated) && (
           <RightPanel onNavigateToMenu={() => setActiveTab('menu')} />
         )}
       </main>
 
-      <AuthModal 
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onAuthSuccess={(user) => setCurrentUser(user)}
-      />
     </div>
   );
 }

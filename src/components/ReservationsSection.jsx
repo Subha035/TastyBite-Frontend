@@ -223,6 +223,9 @@ const ReservationsSection = ({ onReservationSuccess }) => {
                         required
                         value={resDate}
                         onChange={(e) => setResDate(e.target.value)}
+                        onClick={(e) => {
+                          try { e.target.showPicker(); } catch {}
+                        }}
                       />
                     </div>
                   </div>
@@ -236,6 +239,9 @@ const ReservationsSection = ({ onReservationSuccess }) => {
                         required
                         value={resTime}
                         onChange={(e) => setResTime(e.target.value)}
+                        onClick={(e) => {
+                          try { e.target.showPicker(); } catch {}
+                        }}
                       />
                     </div>
                   </div>

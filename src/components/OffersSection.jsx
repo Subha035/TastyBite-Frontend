@@ -39,6 +39,12 @@ const OffersSection = () => {
       setLoading(false);
     }
     loadOffers();
+
+    const handleOffersUpdated = () => {
+      loadOffers();
+    };
+    window.addEventListener('offersUpdated', handleOffersUpdated);
+    return () => window.removeEventListener('offersUpdated', handleOffersUpdated);
   }, []);
 
   const handleCopyCode = (code, id) => {

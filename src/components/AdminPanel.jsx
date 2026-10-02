@@ -1,13 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart3, Users, ClipboardList, CreditCard, Settings2, Bell, CheckCircle2 } from 'lucide-react';
-import { getActivities, getOrders, getMenuItems, getReservations } from '../services/apiService';
-
-const actions = [
-  { label: 'Manage Menu', icon: ClipboardList, target: 'menu-manager' },
-  { label: 'View Reservations', icon: Bell, target: 'admin-reservations' },
-  { label: 'Update Offers', icon: CreditCard, target: 'offers-manager' },
-  { label: 'System Settings', icon: Settings2 }
-];
+import { BarChart3, ClipboardList, CreditCard, Settings2, Bell, CheckCircle2, Utensils, Check, LogOut, ShieldCheck } from 'lucide-react';
+import { getActivities, getOrders, getMenuItems, getReservations, updateOrderStatus, logActivity } from '../services/apiService';
 
 const formatRelativeTime = (timestamp, fallbackTime) => {
   if (!timestamp) return fallbackTime || 'Just now';
@@ -40,10 +33,13 @@ const getFallbackActivities = () => {
   ];
 };
 
-const AdminPanel = ({ setActiveTab }) => {
+const AdminPanel = ({ setActiveTab, onLogout }) => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(false);
   const [, setNowTick] = useState(Date.now());
+
+  // Orders State
+  const [orders, setOrders] = useState([]);
 
   // Database Overview Cards State
   const [dbStats, setDbStats] = useState({
@@ -67,65 +63,84 @@ const AdminPanel = ({ setActiveTab }) => {
     return () => clearInterval(interval);
   }, []);
 
+  async function loadDashboardData() {
+    setLoading(true);
+    try {
+      const [activitiesData, ordersData, menuData] = await Promise.all([
+        getActivities().catch(() => null),
+        getOrders().catch(() => null),
+        getMenuItems().catch(() => null)
+      ]);
+
+      // Process Activities
+      if (Array.isArray(activitiesData) && activitiesData.length > 0) {
+        setActivities(activitiesData.slice(0, 4));
+      } else {
+        setActivities(getFallbackActivities());
+      }
+
+      // Calculate DB Stats
+      const orderList = Array.isArray(ordersData) ? ordersData : [];
+      const menuList = Array.isArray(menuData) ? menuData : [];
+      const totalOrdersCount = orderList.length;
+
+      // Sort latest orders first
+      const sortedOrders = [...orderList].sort((a, b) => {
+        const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return tB - tA;
+      });
+      setOrders(sortedOrders);
+
+      // Today's served / completed orders — handles local date, UTC and multiple completed statuses
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const localTodayStr = `${yyyy}-${mm}-${dd}`;
+      const utcTodayStr = now.toISOString().slice(0, 10);
+
+      const servedCount = orderList.filter(o => {
+        const status = String(o.status || '').toUpperCase();
+        const isCompleted = status === 'SERVED' || status === 'COMPLETED' || status === 'CONFIRMED' || status === 'DELIVERED';
+        if (!isCompleted) return false;
+
+        if (!o.createdAt) return true;
+        const orderDate = String(o.createdAt).slice(0, 10);
+        return orderDate === localTodayStr || orderDate === utcTodayStr;
+      }).length;
+
+      // Revenue calculation
+      const totalRevenueNum = orderList.reduce((sum, o) => {
+        const amt = typeof o.totalAmount === 'number' ? o.totalAmount : (parseFloat(String(o.totalAmount || 0).replace(/[^\d.]/g, '')) || 0);
+        return sum + amt;
+      }, 0);
+
+      let formattedRevenue = `₹${totalRevenueNum}`;
+      if (totalRevenueNum >= 1000) {
+        formattedRevenue = `₹${(totalRevenueNum / 1000).toFixed(1)}K`;
+      }
+
+      setDbStats({
+        totalOrders: totalOrdersCount > 0 ? totalOrdersCount.toLocaleString() : '0',
+        servedToday: servedCount.toLocaleString(),
+        revenue: formattedRevenue,
+        menuUpdates: menuList.length > 0 ? String(menuList.length) : '0'
+      });
+
+    } catch {
+      setActivities(getFallbackActivities());
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
     let isMounted = true;
-
-    async function loadDashboardData() {
-      setLoading(true);
-      try {
-        const [activitiesData, ordersData, menuData, resData] = await Promise.all([
-          getActivities().catch(() => null),
-          getOrders().catch(() => null),
-          getMenuItems().catch(() => null),
-          getReservations().catch(() => null)
-        ]);
-
-        if (!isMounted) return;
-
-        // Process Activities
-        if (Array.isArray(activitiesData) && activitiesData.length > 0) {
-          setActivities(activitiesData.slice(0, 4));
-        } else {
-          setActivities(getFallbackActivities());
-        }
-
-        // Calculate DB Stats
-        const orderList = Array.isArray(ordersData) ? ordersData : [];
-        const menuList = Array.isArray(menuData) ? menuData : [];
-        const totalOrdersCount = orderList.length;
-
-        // Today's served / completed orders
-        const servedCount = orderList.filter(o => o.status === 'COMPLETED' || o.status === 'SERVED' || o.status === 'CONFIRMED').length;
-
-        // Revenue calculation
-        const totalRevenueNum = orderList.reduce((sum, o) => {
-          const amt = typeof o.totalAmount === 'number' ? o.totalAmount : (parseFloat(String(o.totalAmount || 0).replace(/[^\d.]/g, '')) || 0);
-          return sum + amt;
-        }, 0);
-
-        let formattedRevenue = `₹${totalRevenueNum}`;
-        if (totalRevenueNum >= 1000) {
-          formattedRevenue = `₹${(totalRevenueNum / 1000).toFixed(1)}K`;
-        }
-
-        setDbStats({
-          totalOrders: totalOrdersCount > 0 ? totalOrdersCount.toLocaleString() : '0',
-          servedToday: servedCount > 0 ? servedCount.toLocaleString() : String(totalOrdersCount),
-          revenue: formattedRevenue,
-          menuUpdates: menuList.length > 0 ? String(menuList.length) : '0'
-        });
-
-      } catch {
-        if (isMounted) setActivities(getFallbackActivities());
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-
     loadDashboardData();
 
     const handleDataUpdated = () => {
-      loadDashboardData();
+      if (isMounted) loadDashboardData();
     };
 
     window.addEventListener('activitiesUpdated', handleDataUpdated);
@@ -145,13 +160,15 @@ const AdminPanel = ({ setActiveTab }) => {
       title: 'Total Orders',
       value: dbStats.totalOrders,
       icon: ClipboardList,
-      subtitle: 'All orders placed in DB'
+      subtitle: 'Click to open Live Orders page',
+      onClick: () => handleActionClick('admin-orders')
     },
     {
       title: 'Orders Served Today',
       value: dbStats.servedToday,
       icon: CheckCircle2,
-      subtitle: 'Orders fulfilled & delivered'
+      subtitle: 'Click to open Live Orders page',
+      onClick: () => handleActionClick('admin-orders')
     },
     {
       title: 'Revenue',
@@ -167,15 +184,64 @@ const AdminPanel = ({ setActiveTab }) => {
     }
   ];
 
+  const actions = [
+    { label: 'Live Orders & Kitchen Status', icon: Utensils, target: 'admin-orders' },
+    { label: 'Manage Menu', icon: ClipboardList, target: 'menu-manager' },
+    { label: 'View Reservations', icon: Bell, target: 'admin-reservations' },
+    { label: 'Update Offers', icon: CreditCard, target: 'offers-manager' }
+  ];
+
   return (
     <div className="admin-panel">
-      <div className="admin-panel-header">
+      <style>{`
+        .stat-card-clickable {
+          cursor: pointer;
+        }
+        .stat-card-clickable:hover {
+          border-color: #d85e13;
+        }
+      `}</style>
+
+      <div className="admin-panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <p className="section-label">Admin Dashboard</p>
           <h1 className="section-title">Restaurant Management</h1>
         </div>
-        <div className="admin-header-note">
-          <span>Live control and quick access for staff operations.</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '20px', background: 'rgba(216, 94, 19, 0.1)', color: '#d85e13', fontSize: '0.82rem', fontWeight: '700' }}>
+            <ShieldCheck size={16} /> Admin035
+          </div>
+          {onLogout && (
+            <button 
+              type="button" 
+              onClick={onLogout}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 14px',
+                borderRadius: '10px',
+                border: '1px solid var(--border-color)',
+                background: 'var(--card-bg)',
+                color: 'var(--text-main)',
+                fontSize: '0.82rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#ef4444';
+                e.currentTarget.style.color = '#ef4444';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border-color)';
+                e.currentTarget.style.color = 'var(--text-main)';
+              }}
+              title="Log out from Admin panel"
+            >
+              <LogOut size={15} /> Log Out
+            </button>
+          )}
         </div>
       </div>
 
@@ -183,7 +249,12 @@ const AdminPanel = ({ setActiveTab }) => {
         {statsCards.map((item) => {
           const Icon = item.icon;
           return (
-            <div key={item.title} className="admin-card">
+            <div 
+              key={item.title} 
+              className={`admin-card ${item.onClick ? 'stat-card-clickable' : ''}`}
+              onClick={item.onClick}
+              title={item.onClick ? 'Click to filter orders' : ''}
+            >
               <div className="admin-card-top">
                 <div className="admin-card-icon">
                   <Icon size={18} />
@@ -207,7 +278,10 @@ const AdminPanel = ({ setActiveTab }) => {
               <button
                 key={action.label}
                 className="admin-action-btn"
-                onClick={() => handleActionClick(action.target)}
+                onClick={() => {
+                  if (action.onClick) action.onClick();
+                  else if (action.target) handleActionClick(action.target);
+                }}
               >
                 <span className="admin-action-icon"><Icon size={16} /></span>
                 {action.label}
@@ -225,7 +299,7 @@ const AdminPanel = ({ setActiveTab }) => {
           ) : activities.length > 0 ? (
             activities.map((item, idx) => (
               <div key={item.id || idx} className="activity-item">
-                <div>{item.title}</div>
+                <div className="activity-title">{item.title}</div>
                 <div className="activity-time">{formatRelativeTime(item.timestamp, item.time)}</div>
               </div>
             ))

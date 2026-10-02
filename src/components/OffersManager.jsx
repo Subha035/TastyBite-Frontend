@@ -5,8 +5,6 @@ import {
   Edit2, 
   Save, 
   ArrowLeft, 
-  Moon, 
-  Sun, 
   Tag, 
   Ticket, 
   ShoppingBag, 
@@ -22,7 +20,7 @@ const initialCoupons = [
 
 const OffersManager = ({ onBack }) => {
   const [coupons, setCoupons] = useState(initialCoupons);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+
   const [form, setForm] = useState({ code: '', discount: '', minCart: '', maxDiscount: '', description: '' });
   const [editingId, setEditingId] = useState(null);
 
@@ -144,37 +142,40 @@ const OffersManager = ({ onBack }) => {
   };
 
   return (
-    <div className={`offers-wrapper ${isDarkMode ? 'dark-theme' : 'light-theme'}`}>
+    <div className="offers-wrapper">
       <style>{`
         /* Dynamic CSS Theme Variables */
-        .offers-wrapper.light-theme {
+        .offers-wrapper {
           --bg-main: #f8fafc;
           --bg-card: #ffffff;
           --bg-input: #f1f5f9;
           --border-color: #e2e8f0;
           --text-primary: #0f172a;
-          --text-secondary: #64748b;
+          --text-secondary: #5e6670;
           --placeholder-color: #94a3b8;
-          --accent: #e11d48;
-          --accent-hover: #be123c;
+          --accent: #d85e13;
+          --accent-hover: #bd4d0a;
           --item-bg: #f8fafc;
-          --badge-bg: #ffe4e6;
-          --badge-text: #e11d48;
+          --badge-bg: rgba(216, 94, 19, 0.12);
+          --badge-text: #d85e13;
+          --shadow-color: rgba(0, 0, 0, 0.05);
         }
 
-        .offers-wrapper.dark-theme {
-          --bg-main: #0b0f19;
-          --bg-card: #151e32;
-          --bg-input: #1e293b;
-          --border-color: #334155;
-          --text-primary: #f8fafc;
-          --text-secondary: #cbd5e1;
-          --placeholder-color: #64748b;
-          --accent: #f43f5e;
-          --accent-hover: #e11d48;
-          --item-bg: #1e293b;
-          --badge-bg: #88133750;
-          --badge-text: #fda4af;
+        .offers-wrapper.dark-theme,
+        [data-theme='dark'] .offers-wrapper {
+          --bg-main: #121318;
+          --bg-card: #1b1d24;
+          --bg-input: #22252e;
+          --border-color: #2c303b;
+          --text-primary: #f5f6f7;
+          --text-secondary: #abb1bb;
+          --placeholder-color: #6b7280;
+          --accent: #d85e13;
+          --accent-hover: #bd4d0a;
+          --item-bg: #17181f;
+          --badge-bg: rgba(216, 94, 19, 0.25);
+          --badge-text: #ff9d5c;
+          --shadow-color: rgba(0, 0, 0, 0.35);
         }
 
         /* Container Layout */
@@ -184,8 +185,7 @@ const OffersManager = ({ onBack }) => {
           overflow-y: auto;
           background-color: var(--bg-main) !important;
           color: var(--text-primary) !important;
-          padding: 24px;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          padding: 24px 24px 64px 24px;
           box-sizing: border-box;
           transition: background-color 0.2s, color 0.2s;
         }
@@ -207,6 +207,7 @@ const OffersManager = ({ onBack }) => {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          box-shadow: 0 2px 8px var(--shadow-color);
         }
 
         .header-title {
@@ -243,11 +244,12 @@ const OffersManager = ({ onBack }) => {
           gap: 6px;
           font-size: 13px;
           font-weight: 500;
-          transition: opacity 0.2s;
+          transition: background-color 0.2s, border-color 0.2s, transform 0.15s;
         }
 
         .icon-btn:hover {
-          opacity: 0.85;
+          background: var(--border-color) !important;
+          transform: translateY(-1px);
         }
 
         /* Grid */
@@ -262,6 +264,10 @@ const OffersManager = ({ onBack }) => {
           .offers-grid {
             grid-template-columns: 1fr;
           }
+
+          .coupons-list-card {
+            max-height: 580px;
+          }
         }
 
         .card {
@@ -270,6 +276,7 @@ const OffersManager = ({ onBack }) => {
           border-radius: 16px;
           padding: 20px;
           color: var(--text-primary) !important;
+          box-shadow: 0 2px 8px var(--shadow-color);
         }
 
         .card-header {
@@ -298,8 +305,14 @@ const OffersManager = ({ onBack }) => {
 
         .form-row {
           display: grid;
-          grid-template-columns: 1fr 1fr 1fr;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 10px;
+        }
+
+        .form-row > div {
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
         }
 
         .form-label {
@@ -309,6 +322,8 @@ const OffersManager = ({ onBack }) => {
           text-transform: uppercase;
           color: var(--text-secondary) !important;
           margin-bottom: 6px;
+          letter-spacing: 0.5px;
+          min-height: 16px;
         }
 
         .form-input, .form-textarea {
@@ -321,6 +336,7 @@ const OffersManager = ({ onBack }) => {
           font-size: 13px;
           outline: none;
           box-sizing: border-box;
+          transition: border-color 0.2s, background-color 0.2s;
         }
 
         .form-input::placeholder, .form-textarea::placeholder {
@@ -353,6 +369,12 @@ const OffersManager = ({ onBack }) => {
           justify-content: center;
           gap: 8px;
           margin-top: 10px;
+          transition: background-color 0.2s, transform 0.15s;
+        }
+
+        .submit-btn:hover {
+          background: var(--accent-hover) !important;
+          transform: translateY(-1px);
         }
 
         /* Scroll Area */
@@ -360,28 +382,57 @@ const OffersManager = ({ onBack }) => {
           display: flex;
           flex-direction: column;
           max-height: 650px;
+          min-height: 0;
+          box-sizing: border-box;
         }
 
         .coupons-list-scroll {
           flex: 1;
+          min-height: 0;
           overflow-y: auto;
           display: flex;
           flex-direction: column;
           gap: 12px;
-          padding-right: 6px;
+          padding: 2px 6px 24px 2px;
+          box-sizing: border-box;
+        }
+
+        .coupons-list-scroll::after {
+          content: '';
+          display: block;
+          height: 16px;
+          min-height: 16px;
+          flex-shrink: 0;
+        }
+
+        .coupons-list-scroll::-webkit-scrollbar {
+          width: 6px;
+        }
+        .coupons-list-scroll::-webkit-scrollbar-track {
+          background: var(--bg-input);
+          border-radius: 4px;
+        }
+        .coupons-list-scroll::-webkit-scrollbar-thumb {
+          background: var(--border-color);
+          border-radius: 4px;
         }
 
         /* Coupon Card Details */
         .coupon-card {
           background: var(--item-bg) !important;
           border: 1px dashed var(--border-color);
-          border-radius: 12px;
+          border-radius: 14px;
           padding: 14px 16px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 12px;
+          gap: 14px;
           flex-shrink: 0;
+          transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .coupon-card:hover {
+          border-color: var(--accent);
         }
 
         .coupon-info {
@@ -389,6 +440,7 @@ const OffersManager = ({ onBack }) => {
           align-items: flex-start;
           gap: 12px;
           flex: 1;
+          min-width: 0;
         }
 
         .coupon-icon-box {
@@ -412,23 +464,52 @@ const OffersManager = ({ onBack }) => {
         }
 
         .coupon-meta {
-          font-size: 12px;
-          color: var(--text-secondary) !important;
           display: flex;
           align-items: center;
+          flex-wrap: wrap;
           gap: 6px;
-          margin-bottom: 4px;
+          margin: 6px 0;
+        }
+
+        .coupon-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 11.5px;
+          font-weight: 600;
+          padding: 3px 8px;
+          border-radius: 6px;
+          background: var(--bg-input);
+          color: var(--text-secondary);
+          border: 1px solid var(--border-color);
+        }
+
+        .coupon-pill.discount-pill {
+          color: var(--accent);
+          background: var(--badge-bg);
+          border-color: rgba(216, 94, 19, 0.25);
+        }
+
+        .coupon-pill.cap-pill {
+          color: #10b981;
+        }
+
+        [data-theme='dark'] .coupon-pill.cap-pill,
+        .dark-theme .coupon-pill.cap-pill {
+          color: #34d399;
         }
 
         .coupon-desc {
           font-size: 12px;
-          color: var(--text-primary) !important;
+          color: var(--text-secondary) !important;
           margin: 0;
+          line-height: 1.4;
         }
 
         .badge-count {
           background: var(--bg-input) !important;
           color: var(--text-secondary) !important;
+          border: 1px solid var(--border-color);
           font-size: 11px;
           padding: 4px 8px;
           border-radius: 20px;
@@ -438,6 +519,42 @@ const OffersManager = ({ onBack }) => {
           display: flex;
           align-items: center;
           gap: 6px;
+        }
+
+        @media (max-width: 640px) {
+          .offers-wrapper {
+            padding: 14px 10px 60px 10px;
+          }
+
+          .offers-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+          }
+
+          .form-row {
+            grid-template-columns: 1fr;
+          }
+
+          .coupons-list-card {
+            max-height: 520px;
+          }
+
+          .coupons-list-scroll {
+            padding: 2px 4px 32px 2px;
+          }
+
+          .coupon-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+          }
+
+          .action-btns {
+            width: 100%;
+            justify-content: flex-end;
+          }
         }
       `}</style>
 
@@ -450,10 +567,7 @@ const OffersManager = ({ onBack }) => {
           </div>
 
           <div className="header-actions">
-            <button className="icon-btn" onClick={() => setIsDarkMode(!isDarkMode)}>
-              {isDarkMode ? <Sun size={16} color="#fbbf24" /> : <Moon size={16} />}
-              {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-            </button>
+
             {onBack && (
               <button className="icon-btn" onClick={onBack}>
                 <ArrowLeft size={16} /> Back
@@ -530,10 +644,25 @@ const OffersManager = ({ onBack }) => {
               />
             </div>
 
-            <button className="submit-btn" onClick={handleSaveCoupon}>
-              {editingId ? <Save size={16} /> : <Plus size={16} />}
-              {editingId ? 'Update Coupon' : 'Add Coupon'}
-            </button>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+              <button className="submit-btn" onClick={handleSaveCoupon} style={{ flex: 1, marginTop: 0 }}>
+                {editingId ? <Save size={16} /> : <Plus size={16} />}
+                {editingId ? 'Update Coupon' : 'Add Coupon'}
+              </button>
+              {editingId && (
+                <button 
+                  type="button" 
+                  className="icon-btn" 
+                  onClick={() => {
+                    setEditingId(null);
+                    setForm({ code: '', discount: '', minCart: '', maxDiscount: '', description: '' });
+                  }}
+                  style={{ padding: '0 16px' }}
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Coupons List Card */}
@@ -553,19 +682,17 @@ const OffersManager = ({ onBack }) => {
                     <div className="coupon-icon-box">
                       <Ticket size={20} />
                     </div>
-                    <div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <h4 className="coupon-code-badge">{coupon.code}</h4>
                       <div className="coupon-meta">
-                        <span style={{ display: 'flex', items: 'center', gap: '3px', fontWeight: 600 }}>
-                          <Percent size={12} /> {coupon.discount}
+                        <span className="coupon-pill discount-pill">
+                          <Percent size={11} /> {coupon.discount.includes('%') ? coupon.discount : `${coupon.discount}%`}
                         </span>
-                        <span>•</span>
-                        <span style={{ display: 'flex', items: 'center', gap: '3px' }}>
-                          <ShoppingBag size={12} /> Min cart {coupon.minCart}
+                        <span className="coupon-pill cart-pill">
+                          <ShoppingBag size={11} /> Min {coupon.minCart.startsWith('₹') ? coupon.minCart : `₹${coupon.minCart}`}
                         </span>
-                        <span>•</span>
-                        <span style={{ color: coupon.maxDiscount === 'Unlimited' ? '#10b981' : '#f59e0b', fontWeight: 600 }}>
-                          Max cap: {coupon.maxDiscount || 'Unlimited'}
+                        <span className="coupon-pill cap-pill">
+                          Max {coupon.maxDiscount || 'Unlimited'}
                         </span>
                       </div>
                       <p className="coupon-desc">{coupon.description}</p>
@@ -582,6 +709,9 @@ const OffersManager = ({ onBack }) => {
                   </div>
                 </div>
               ))}
+              {coupons.length > 0 && (
+                <div style={{ height: '20px', flexShrink: 0 }} aria-hidden="true" />
+              )}
             </div>
           </div>
         </div>

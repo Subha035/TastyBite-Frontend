@@ -1,4 +1,9 @@
-const API_BASE_URL = 'https://tastybite-spye.onrender.com/api';
+const API_BASE_URL = 
+  import.meta.env.VITE_API_URL || 
+  (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:8080/api'
+    : 'http://localhost:8080/api' // 'https://tastybite-spye.onrender.com/api'
+  );
 
 export function getAuthToken() {
   if (typeof window !== 'undefined') {
@@ -35,14 +40,43 @@ export function setStoredUser(user) {
   }
 }
 
+// In-memory cache & in-flight request deduplication for instant loading
+const apiCache = new Map();
+const inFlightRequests = new Map();
+
+export function clearApiCache(endpointPrefix) {
+  if (!endpointPrefix) {
+    apiCache.clear();
+    return;
+  }
+  for (const key of apiCache.keys()) {
+    if (key.includes(endpointPrefix)) {
+      apiCache.delete(key);
+    }
+  }
+}
+
 /**
- * Generic fetch wrapper with graceful error handling and fallbacks
+ * Generic fetch wrapper with graceful error handling, fast memory cache and request deduplication
  */
 async function fetchApi(endpoint, options = {}) {
-  // const token = getAuthToken();
-const token = getAuthToken();
+  const method = (options.method || 'GET').toUpperCase();
+  const cacheKey = `${method}:${endpoint}`;
 
+  // If GET request, check cache (30s TTL)
+  if (method === 'GET' && !options.noCache) {
+    const cached = apiCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp < 30000)) {
+      return cached.data;
+    }
 
+    // Deduplicate in-flight requests (e.g. RightPanel + HomeSection calling /menu at the same time)
+    if (inFlightRequests.has(cacheKey)) {
+      return inFlightRequests.get(cacheKey);
+    }
+  }
+
+  const token = getAuthToken();
   const headers = {
     'Content-Type': 'application/json',
     ...options.headers
@@ -52,26 +86,46 @@ const token = getAuthToken();
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers
-    });
+  const fetchPromise = (async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      let errorJson = null;
-      try { errorJson = JSON.parse(errorText); } catch {}
-      const msg = errorJson?.message || `API error: ${response.status} ${response.statusText}`;
-      throw new Error(msg);
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorJson = null;
+        try { errorJson = JSON.parse(errorText); } catch {}
+        const msg = errorJson?.message || `API error: ${response.status} ${response.statusText}`;
+        throw new Error(msg);
+      }
+
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : null;
+
+      if (method === 'GET') {
+        apiCache.set(cacheKey, { timestamp: Date.now(), data });
+      } else {
+        // Any mutation (POST, PUT, DELETE) clears the cache for that resource
+        const resource = endpoint.split('/')[1] || '';
+        if (resource) clearApiCache(resource);
+      }
+
+      return data;
+    } catch (error) {
+      console.warn(`Backend connection issue at ${endpoint}:`, error.message);
+      throw error;
+    } finally {
+      inFlightRequests.delete(cacheKey);
     }
+  })();
 
-    const text = await response.text();
-    return text ? JSON.parse(text) : null;
-  } catch (error) {
-    console.warn(`Backend connection issue at ${endpoint}:`, error.message);
-    throw error;
+  if (method === 'GET') {
+    inFlightRequests.set(cacheKey, fetchPromise);
   }
+
+  return fetchPromise;
 }
 
 // --- AUTH API ---
@@ -230,6 +284,13 @@ export async function updateOrderStatus(id, status) {
   });
 }
 
+export async function updateOrderPaymentStatus(id, paymentStatus) {
+  return await fetchApi(`/orders/${id}/payment-status`, {
+    method: 'PUT',
+    body: JSON.stringify({ paymentStatus })
+  });
+}
+
 // --- CHAT API ---
 export async function sendChatMessage(messageText) {
   try {
@@ -243,10 +304,14 @@ export async function sendChatMessage(messageText) {
 }
 
 // --- ADMIN API ---
-export async function adminLogin(email, password) {
+export async function adminLogin(usernameOrEmail, password) {
   return await fetchApi('/admin/login', {
     method: 'POST',
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify({ 
+      username: usernameOrEmail, 
+      email: usernameOrEmail, 
+      password 
+    })
   });
 }
 

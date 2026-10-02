@@ -54,14 +54,15 @@ const ContactSection = () => {
           
           background-color: var(--bg-main);
           color: var(--text-main);
-          min-height: 100vh;
+          min-height: 100%;
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: center;
           padding: 4rem 2rem;
           font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
           position: relative;
-          overflow: hidden;
+          overflow-y: auto;
+          overflow-x: hidden;
         }
 
         /* Ambient Mesh Background */
@@ -294,6 +295,176 @@ const ContactSection = () => {
           from { opacity: 0; transform: translateY(4px); }
           to { opacity: 1; transform: translateY(0); }
         }
+
+        @media (max-width: 900px) {
+          .modern-contact-viewport {
+            padding: 1.5rem 1rem;
+            align-items: flex-start;
+          }
+
+          .modern-layout-box {
+            border-radius: 20px;
+          }
+
+          .brand-column, .form-column {
+            padding: 2rem 1.5rem;
+          }
+
+          .brand-heading {
+            font-size: 2.2rem;
+            margin: 1.5rem 0 1rem 0;
+          }
+
+          .brand-sub {
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+          }
+
+          .interactive-chip {
+            min-height: 90px;
+            padding: 1rem;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .modern-contact-viewport {
+            padding: 0.75rem 0.5rem;
+          }
+
+          .modern-layout-box {
+            border-radius: 16px;
+          }
+
+          .brand-column, .form-column {
+            padding: 1.5rem 1.25rem;
+          }
+
+          .brand-heading {
+            font-size: 1.6rem;
+            margin: 1rem 0 0.75rem 0;
+          }
+
+          .brand-sub {
+            font-size: 0.88rem;
+            margin-bottom: 1.5rem;
+          }
+
+          .chips-container {
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+          }
+
+          .interactive-chip {
+            min-height: 80px;
+            padding: 0.8rem;
+            border-radius: 14px;
+          }
+
+          .chip-val {
+            font-size: 0.8rem;
+          }
+
+          .conversational-form {
+            gap: 1.8rem;
+          }
+
+          .clean-input {
+            font-size: 1rem;
+          }
+
+          .neon-submit {
+            padding: 1rem;
+            font-size: 0.9rem;
+          }
+        }
+
+        @media (max-width: 400px) {
+          .modern-contact-viewport {
+            padding: 0.5rem 0.25rem;
+          }
+
+          .modern-layout-box {
+            border-radius: 12px;
+            border-left: none;
+            border-right: none;
+            border-radius: 0;
+          }
+
+          .brand-column, .form-column {
+            padding: 1.2rem 1rem;
+          }
+
+          .brand-heading {
+            font-size: 1.4rem;
+            margin: 0.75rem 0 0.5rem 0;
+          }
+
+          .brand-sub {
+            font-size: 0.82rem;
+            margin-bottom: 1.2rem;
+            line-height: 1.5;
+          }
+
+          .live-status-pill {
+            font-size: 0.7rem;
+            padding: 0.35rem 0.7rem;
+          }
+
+          .chips-container {
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+          }
+
+          .interactive-chip {
+            min-height: auto;
+            padding: 0.75rem;
+            border-radius: 12px;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.75rem;
+          }
+
+          .chip-top {
+            flex-shrink: 0;
+          }
+
+          .chip-val {
+            font-size: 0.78rem;
+            margin-top: 0;
+          }
+
+          .chip-val div {
+            display: none;
+          }
+
+          .conversational-form {
+            gap: 1.5rem;
+          }
+
+          .input-wrapper label {
+            font-size: 0.7rem;
+          }
+
+          .clean-input {
+            font-size: 0.92rem;
+            padding: 0.4rem 0 0.6rem 0;
+          }
+
+          .clean-input::placeholder {
+            font-size: 0.82rem;
+          }
+
+          .neon-submit {
+            padding: 0.85rem;
+            font-size: 0.85rem;
+            border-radius: 12px;
+          }
+
+          .toast-banner {
+            font-size: 0.8rem;
+            padding: 0.75rem;
+          }
+        }
       `}</style>
 
       <div className="modern-layout-box">
@@ -310,7 +481,7 @@ const ContactSection = () => {
               visit feel <span>special.</span>
             </h2>
             <p className="brand-sub">
-              Drop by for a tailored culinary experience, coordinate upcoming private catering events, or secure instant reservations.
+              Drop by for a tailored culinary experience, coordinate upcoming private catering events or secure instant reservations.
             </p>
           </div>
 

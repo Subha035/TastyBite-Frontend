@@ -251,3 +251,63 @@
     transform: rotate(360deg);
   }
 }
+
+/* Responsive adjustments for Offers page */
+@media (max-width: 768px) {
+  .offers-page-container {
+    padding: 16px 12px;
+    gap: 18px;
+  }
+
+  .offers-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .offers-page-title {
+    font-size: 20px;
+  }
+
+  .offers-page-subtitle {
+    font-size: 12px;
+  }
+
+  .offer-page-coupon-card {
+    min-height: auto;
+  }
+
+  .coupon-main-content {
+    padding: 14px 14px;
+    gap: 10px;
+  }
+
+  .coupon-footer {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .coupon-left-column {
+    width: 58px;
+  }
+
+  .coupon-tag-circle {
+    width: 30px;
+    height: 30px;
+  }
+
+  .coupon-title {
+    font-size: 14px;
+  }
+
+  .coupon-desc {
+    font-size: 11px;
+  }
+
+  .coupon-copy-btn {
+    padding: 5px 10px;
+    font-size: 10.5px;
+  }
+}
+

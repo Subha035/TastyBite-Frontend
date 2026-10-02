@@ -5,9 +5,7 @@ import {
   Edit2, 
   Save, 
   ArrowLeft, 
-  Moon, 
-  Sun, 
-  Leaf, 
+  Leaf,
   Drumstick,
   Star,
   Package
@@ -26,7 +24,7 @@ const categories = [
 
 const MenuManager = ({ onBack }) => {
   const [menuItems, setMenuItems] = useState([]);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+
   const [form, setForm] = useState({ 
     title: '', 
     category: 'pizza', 
@@ -179,41 +177,47 @@ const MenuManager = ({ onBack }) => {
   };
 
   return (
-    <div className={`menu-wrapper ${isDarkMode ? 'dark-theme' : 'light-theme'}`}>
+    <div className="menu-wrapper">
       <style>{`
-        .menu-wrapper.light-theme {
+        .menu-wrapper {
           --bg-main: #f8fafc;
           --bg-card: #ffffff;
           --bg-input: #f1f5f9;
           --border-color: #e2e8f0;
           --text-primary: #0f172a;
           --text-secondary: #64748b;
-          --accent: #6366f1;
-          --accent-hover: #4f46e5;
+          --placeholder-color: #94a3b8;
+          --accent: #d85e13;
+          --accent-hover: #bd4d0a;
           --item-bg: #f8fafc;
+          --item-hover-bg: #f1f5f9;
+          --shadow-color: rgba(0, 0, 0, 0.05);
         }
 
-        .menu-wrapper.dark-theme {
-          --bg-main: #090d16;
-          --bg-card: #111827;
-          --bg-input: #1f2937;
-          --border-color: #1f2937;
-          --text-primary: #f9fafb;
-          --text-secondary: #9ca3af;
-          --accent: #6366f1;
-          --accent-hover: #4f46e5;
-          --item-bg: #172033;
+        .menu-wrapper.dark-theme,
+        [data-theme='dark'] .menu-wrapper {
+          --bg-main: #121318;
+          --bg-card: #1b1d24;
+          --bg-input: #22252e;
+          --border-color: #2c303b;
+          --text-primary: #f5f6f7;
+          --text-secondary: #abb1bb;
+          --placeholder-color: #6b7280;
+          --accent: #d85e13;
+          --accent-hover: #bd4d0a;
+          --item-bg: #17181f;
+          --item-hover-bg: #22252e;
+          --shadow-color: rgba(0, 0, 0, 0.35);
         }
 
         /* Layout Fixes for Scrolling */
         .menu-wrapper {
           min-height: 100vh;
           height: 100%;
-          overflow-y: auto; /* Allows full page scrolling if needed */
-          background-color: var(--bg-main);
-          color: var(--text-primary);
-          padding: 24px;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          overflow-y: auto;
+          background-color: var(--bg-main) !important;
+          color: var(--text-primary) !important;
+          padding: 24px 24px 64px 24px;
           box-sizing: border-box;
           transition: background-color 0.2s, color 0.2s;
         }
@@ -235,12 +239,14 @@ const MenuManager = ({ onBack }) => {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          box-shadow: 0 2px 8px var(--shadow-color);
         }
 
         .header-title {
           margin: 0;
           font-size: 22px;
           font-weight: 700;
+          color: var(--text-primary);
         }
 
         .header-sub {
@@ -270,7 +276,12 @@ const MenuManager = ({ onBack }) => {
           gap: 6px;
           font-size: 13px;
           font-weight: 500;
-          transition: background-color 0.2s;
+          transition: background-color 0.2s, border-color 0.2s, transform 0.15s;
+        }
+
+        .icon-btn:hover {
+          background: var(--border-color);
+          transform: translateY(-1px);
         }
 
         /* Grid System */
@@ -285,6 +296,10 @@ const MenuManager = ({ onBack }) => {
           .menu-grid {
             grid-template-columns: 1fr;
           }
+
+          .items-list-card {
+            max-height: 580px;
+          }
         }
 
         .card {
@@ -292,6 +307,7 @@ const MenuManager = ({ onBack }) => {
           border: 1px solid var(--border-color);
           border-radius: 16px;
           padding: 20px;
+          box-shadow: 0 2px 8px var(--shadow-color);
         }
 
         .card-header {
@@ -307,6 +323,7 @@ const MenuManager = ({ onBack }) => {
           margin: 0;
           font-size: 16px;
           font-weight: 600;
+          color: var(--text-primary);
         }
 
         /* Form Controls */
@@ -327,6 +344,7 @@ const MenuManager = ({ onBack }) => {
           text-transform: uppercase;
           color: var(--text-secondary);
           margin-bottom: 6px;
+          letter-spacing: 0.5px;
         }
 
         .form-input, .form-select, .form-textarea {
@@ -334,11 +352,26 @@ const MenuManager = ({ onBack }) => {
           padding: 10px 12px;
           border-radius: 10px;
           border: 1px solid var(--border-color);
-          background: var(--bg-input);
-          color: var(--text-primary);
+          background: var(--bg-input) !important;
+          color: var(--text-primary) !important;
           font-size: 13px;
           outline: none;
           box-sizing: border-box;
+          transition: border-color 0.2s, background-color 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+          border-color: var(--accent);
+        }
+
+        .form-input::placeholder, .form-textarea::placeholder {
+          color: var(--placeholder-color) !important;
+          opacity: 1;
+        }
+
+        .form-select option {
+          background: var(--bg-card);
+          color: var(--text-primary);
         }
 
         /* Custom Radio/Buttons */
@@ -349,10 +382,11 @@ const MenuManager = ({ onBack }) => {
           background: var(--bg-input);
           padding: 4px;
           border-radius: 10px;
+          border: 1px solid var(--border-color);
         }
 
         .toggle-btn {
-          border: none;
+          border: 1px solid transparent;
           padding: 8px;
           border-radius: 8px;
           font-size: 12px;
@@ -367,10 +401,14 @@ const MenuManager = ({ onBack }) => {
           transition: all 0.2s;
         }
 
-        .toggle-btn.active-veg { background: #10b981; color: #ffffff; }
-        .toggle-btn.active-nonveg { background: #f43f5e; color: #ffffff; }
-        .toggle-btn.active-stock { background: #10b9811a; color: #10b981; border: 1px solid #10b98140; }
-        .toggle-btn.active-out { background: #f43f5e1a; color: #f43f5e; border: 1px solid #f43f5e40; }
+        .toggle-btn:hover:not(.active-veg):not(.active-nonveg):not(.active-stock):not(.active-out) {
+          color: var(--text-primary);
+        }
+
+        .toggle-btn.active-veg { background: #10b981; color: #ffffff; border-color: #10b981; }
+        .toggle-btn.active-nonveg { background: #f43f5e; color: #ffffff; border-color: #f43f5e; }
+        .toggle-btn.active-stock { background: rgba(16, 185, 129, 0.2); color: #34d399; border-color: rgba(16, 185, 129, 0.4); }
+        .toggle-btn.active-out { background: rgba(244, 63, 94, 0.2); color: #fb7185; border-color: rgba(244, 63, 94, 0.4); }
 
         .submit-btn {
           width: 100%;
@@ -387,22 +425,40 @@ const MenuManager = ({ onBack }) => {
           justify-content: center;
           gap: 8px;
           margin-top: 10px;
+          transition: background-color 0.2s, transform 0.15s;
+        }
+
+        .submit-btn:hover {
+          background: var(--accent-hover);
+          transform: translateY(-1px);
         }
 
         /* Fixed Scrolling Area for Item List */
         .items-list-card {
           display: flex;
           flex-direction: column;
-          max-height: 750px; /* Fixed height container */
+          max-height: 750px;
+          min-height: 0;
+          box-sizing: border-box;
         }
 
         .items-list-scroll {
           flex: 1;
-          overflow-y: auto; /* Enables smooth inner scroll */
+          min-height: 0;
+          overflow-y: auto;
           display: flex;
           flex-direction: column;
           gap: 12px;
-          padding-right: 6px;
+          padding: 2px 6px 24px 2px;
+          box-sizing: border-box;
+        }
+
+        .items-list-scroll::after {
+          content: '';
+          display: block;
+          height: 16px;
+          min-height: 16px;
+          flex-shrink: 0;
         }
 
         /* Styled Scrollbar */
@@ -427,7 +483,16 @@ const MenuManager = ({ onBack }) => {
           align-items: center;
           justify-content: space-between;
           gap: 12px;
-          flex-shrink: 0; /* Prevents cards from squishing */
+          flex-shrink: 0;
+          transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .item-card:hover {
+          background: var(--item-hover-bg);
+        }
+
+        .item-card.is-unavailable {
+          opacity: 0.65;
         }
 
         .item-info {
@@ -435,6 +500,7 @@ const MenuManager = ({ onBack }) => {
           align-items: center;
           gap: 12px;
           flex: 1;
+          min-width: 0;
         }
 
         .item-img {
@@ -447,14 +513,17 @@ const MenuManager = ({ onBack }) => {
           align-items: center;
           justify-content: center;
           color: var(--text-secondary);
+          flex-shrink: 0;
         }
 
         .item-title {
           font-size: 14px;
           font-weight: 600;
+          color: var(--text-primary);
           margin: 0 0 4px 0;
           display: flex;
           align-items: center;
+          flex-wrap: wrap;
           gap: 8px;
         }
 
@@ -464,10 +533,40 @@ const MenuManager = ({ onBack }) => {
           border-radius: 4px;
           text-transform: uppercase;
           font-weight: 700;
+          letter-spacing: 0.5px;
         }
 
-        .badge-veg { background: #10b98120; color: #10b981; }
-        .badge-nonveg { background: #f43f5e20; color: #f43f5e; }
+        .badge-veg { 
+          background: rgba(16, 185, 129, 0.15); 
+          color: #10b981; 
+          border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .badge-nonveg { 
+          background: rgba(244, 63, 94, 0.15); 
+          color: #f43f5e; 
+          border: 1px solid rgba(244, 63, 94, 0.3);
+        }
+        .badge-stock-out {
+          background: rgba(239, 68, 68, 0.15);
+          color: #ef4444;
+          border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .dark-theme .badge-veg,
+        [data-theme='dark'] .badge-veg { 
+          background: rgba(16, 185, 129, 0.25); 
+          color: #34d399; 
+        }
+        .dark-theme .badge-nonveg,
+        [data-theme='dark'] .badge-nonveg { 
+          background: rgba(244, 63, 94, 0.25); 
+          color: #fb7185; 
+        }
+        .dark-theme .badge-stock-out,
+        [data-theme='dark'] .badge-stock-out { 
+          background: rgba(239, 68, 68, 0.25); 
+          color: #f87171; 
+        }
 
         .item-meta {
           font-size: 12px;
@@ -475,6 +574,12 @@ const MenuManager = ({ onBack }) => {
           display: flex;
           align-items: center;
           gap: 6px;
+          flex-wrap: wrap;
+        }
+
+        .item-price {
+          color: var(--text-primary);
+          font-weight: 700;
         }
 
         .item-actions {
@@ -486,9 +591,46 @@ const MenuManager = ({ onBack }) => {
         .badge-count {
           background: var(--bg-input);
           color: var(--text-secondary);
+          border: 1px solid var(--border-color);
           font-size: 11px;
           padding: 4px 8px;
           border-radius: 20px;
+        }
+
+        @media (max-width: 600px) {
+          .menu-wrapper {
+            padding: 14px 10px 60px 10px;
+          }
+
+          .menu-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+          }
+
+          .form-row {
+            grid-template-columns: 1fr;
+          }
+
+          .items-list-card {
+            max-height: 520px;
+          }
+
+          .items-list-scroll {
+            padding: 2px 4px 32px 2px;
+          }
+
+          .item-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+          }
+
+          .item-actions {
+            width: 100%;
+            justify-content: flex-end;
+          }
         }
       `}</style>
 
@@ -501,10 +643,7 @@ const MenuManager = ({ onBack }) => {
           </div>
 
           <div className="header-actions">
-            <button className="icon-btn" onClick={() => setIsDarkMode(!isDarkMode)}>
-              {isDarkMode ? <Sun size={16} color="#fbbf24" /> : <Moon size={16} />}
-              {isDarkMode ? 'Light' : 'Dark'}
-            </button>
+
             {onBack && (
               <button className="icon-btn" onClick={onBack}>
                 <ArrowLeft size={16} /> Back
@@ -648,7 +787,7 @@ const MenuManager = ({ onBack }) => {
 
             <div className="items-list-scroll">
               {menuItems.map(item => (
-                <div className="item-card" key={item.id}>
+                <div className={`item-card ${!item.isAvailable ? 'is-unavailable' : ''}`} key={item.id}>
                   <div className="item-info">
                     {item.image ? (
                       <img src={item.image} alt={item.title} className="item-img" />
@@ -661,11 +800,14 @@ const MenuManager = ({ onBack }) => {
                         <span className={`badge ${item.isVeg ? 'badge-veg' : 'badge-nonveg'}`}>
                           {item.isVeg ? 'Veg' : 'Non-Veg'}
                         </span>
+                        {!item.isAvailable && (
+                          <span className="badge badge-stock-out">Out of Stock</span>
+                        )}
                       </h4>
                       <div className="item-meta">
                         <span style={{ textTransform: 'capitalize' }}>{item.category}</span>
                         <span>•</span>
-                        <strong>{item.price}</strong>
+                        <strong className="item-price">{item.price}</strong>
                         <span>•</span>
                         <span style={{ color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '2px' }}>
                           <Star size={12} fill="#f59e0b" /> {item.rating}
@@ -684,6 +826,9 @@ const MenuManager = ({ onBack }) => {
                   </div>
                 </div>
               ))}
+              {menuItems.length > 0 && (
+                <div style={{ height: '20px', flexShrink: 0 }} aria-hidden="true" />
+              )}
             </div>
           </div>
         </div>

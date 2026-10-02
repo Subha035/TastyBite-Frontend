@@ -357,6 +357,7 @@
 
 /* Dark Mode overrides */
 [data-theme='dark'] {
+  color-scheme: dark;
   --bg-main: #121318;
   --bg-container: #1b1d24;
   --bg-right: #121318;
@@ -398,6 +399,28 @@ body {
   width: 100vw;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Global Date & Time Picker Indicator Visibility */
+input[type="date"],
+input[type="time"] {
+  color-scheme: light;
+}
+
+[data-theme='dark'] input[type="date"],
+[data-theme='dark'] input[type="time"],
+.dark-theme input[type="date"],
+.dark-theme input[type="time"] {
+  color-scheme: dark !important;
+}
+
+[data-theme='dark'] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme='dark'] input[type="time"]::-webkit-calendar-picker-indicator,
+.dark-theme input[type="date"]::-webkit-calendar-picker-indicator,
+.dark-theme input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: none !important;
+  cursor: pointer;
+  opacity: 0.92;
 }
 
 /* Scrollbar Customization */
@@ -1614,15 +1637,29 @@ input:checked + .slider:before {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   padding: 16px 18px;
   border-radius: 18px;
   background-color: var(--bg-main);
   border: 1px solid var(--border-color);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.activity-title {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-main);
+  line-height: 1.45;
+  word-break: break-word;
+  flex: 1;
+  min-width: 0;
 }
 
 .activity-time {
   font-size: 12px;
   color: var(--text-subtle);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .empty-reservation-state {
@@ -2558,5 +2595,383 @@ input:checked + .slider:before {
 .user-logout-icon-btn:hover {
   background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
+}
+
+/* ========================================================
+   MOBILE NAVBAR & DRAWER STYLES
+   ======================================================== */
+.mobile-top-nav {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  height: 58px;
+  background-color: var(--bg-container);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+  z-index: 90;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.mobile-hamburger-btn {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-hamburger-btn:hover {
+  background: var(--card-hover-bg);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.mobile-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.mobile-brand-icon {
+  background-color: var(--primary-color);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(216, 94, 19, 0.3);
+}
+
+.mobile-brand-title {
+  color: var(--text-main);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+
+.mobile-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-theme-toggle {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-theme-toggle:hover {
+  background: var(--card-hover-bg);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.mobile-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 998;
+  animation: fadeIn 0.2s ease forwards;
+}
+
+.sidebar-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-mobile-close-btn {
+  display: none;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: auto;
+  transition: all 0.2s ease;
+}
+
+.sidebar-mobile-close-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--primary-color);
+}
+
+/* ========================================================
+   RESPONSIVE DESIGN BREAKPOINTS
+   ======================================================== */
+
+/* Large Tablets & Small Laptops (<= 1200px) */
+@media (max-width: 1200px) {
+  .right-panel {
+    display: none !important;
+  }
+}
+
+/* Tablets & Mobile (<= 1024px) */
+@media (max-width: 1024px) {
+  .app-container {
+    flex-direction: column !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  .mobile-top-nav {
+    display: flex !important;
+  }
+
+  .left-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 280px !important;
+    max-width: 85vw !important;
+    height: 100dvh !important;
+    z-index: 1000 !important;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 6px 0 24px rgba(0, 0, 0, 0.6);
+    box-sizing: border-box;
+    padding: calc(20px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));
+    justify-content: flex-start;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .left-sidebar > :first-child,
+  .left-sidebar > :last-child {
+    flex-shrink: 0;
+  }
+
+  .left-sidebar > :last-child {
+    margin-top: auto;
+  }
+
+  .left-sidebar .sidebar-header {
+    margin-bottom: 20px;
+  }
+
+  .left-sidebar .sidebar-menu {
+    margin-bottom: 16px;
+  }
+
+  .left-sidebar.mobile-open {
+    transform: translateX(0) !important;
+  }
+
+  .sidebar-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
+  .sidebar-mobile-close-btn {
+    display: flex !important;
+  }
+
+  .main-wrapper {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border: none !important;
+    height: calc(100dvh - 58px) !important;
+    width: 100% !important;
+  }
+
+  .main-wrapper > .modern-contact-viewport {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 100%;
+  }
+}
+
+/* Mobile Phones (<= 768px) */
+@media (max-width: 768px) {
+  .chat-panel {
+    height: 100%;
+  }
+
+  .chat-header {
+    padding: 12px 14px;
+  }
+
+  .chat-messages {
+    padding: 16px 12px;
+    gap: 14px;
+  }
+
+  .user-bubble {
+    max-width: 88%;
+    font-size: 13.5px;
+    padding: 10px 14px;
+  }
+
+  .bot-bubble {
+    max-width: 92%;
+    font-size: 13.5px;
+    padding: 14px 16px;
+  }
+
+  .chat-input-wrapper {
+    padding: 10px 12px;
+  }
+
+  .chat-input-container {
+    padding: 6px 10px;
+  }
+
+  .pizza-cards-list {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  .pizza-recommend-card {
+    min-width: 240px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+  }
+
+  /* Admin & Dashboard Mobile */
+  .admin-panel {
+    padding: 16px 12px !important;
+    gap: 16px !important;
+  }
+
+  .admin-panel-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .admin-panel .section-title {
+    font-size: 22px !important;
+  }
+
+  .admin-header-note {
+    max-width: 100% !important;
+  }
+
+  .admin-overview-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .admin-actions-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .offers-manager-grid {
+    grid-template-columns: 1fr !important;
+    max-height: none !important;
+  }
+
+  .offers-form-card,
+  .offers-list-card {
+    max-height: none !important;
+  }
+
+  .reservation-card {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .reservation-card-header {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .admin-actions-panel,
+  .admin-activity-panel {
+    padding: 18px 14px !important;
+    border-radius: 20px !important;
+  }
+}
+
+/* Small Phones (<= 480px) */
+@media (max-width: 480px) {
+  .user-bubble, .bot-bubble {
+    max-width: 96%;
+  }
+
+  .pizza-recommend-card {
+    min-width: 210px;
+  }
+
+  .reservation-details-grid,
+  .reservation-edit-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .reservation-card-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .admin-actions-panel,
+  .admin-activity-panel {
+    padding: 16px 12px !important;
+    border-radius: 18px !important;
+  }
+
+  .admin-section-heading {
+    font-size: 15px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .activity-list {
+    gap: 10px !important;
+  }
+
+  .activity-item {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+    padding: 12px 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .activity-title {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    width: 100% !important;
+  }
+
+  .activity-time {
+    font-size: 11.5px !important;
+    align-self: flex-start !important;
+  }
 }
 

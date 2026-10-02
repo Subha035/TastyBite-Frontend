@@ -190,9 +190,15 @@
 .input-icon {
   position: absolute;
   left: 1rem;
-  color: var(--text-muted);
+  color: var(--res-primary, #f59e0b) !important;
   pointer-events: none;
   z-index: 2;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.input-with-icon:focus-within .input-icon {
+  color: var(--res-primary-hover, #d97706) !important;
+  transform: scale(1.1);
 }
 
 /* Inputs & Date Picker Fixes */
@@ -207,6 +213,53 @@
   font-size: 0.95rem;
   outline: none;
   transition: var(--res-transition);
+}
+
+.input-with-icon input[type="date"],
+.input-with-icon input[type="time"] {
+  cursor: pointer;
+}
+
+/* Native Calendar & Clock Picker Icons */
+.input-with-icon input[type="date"]::-webkit-calendar-picker-indicator,
+.input-with-icon input[type="time"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  opacity: 0.85;
+  transition: all 0.2s ease;
+}
+
+.input-with-icon input[type="date"]::-webkit-calendar-picker-indicator:hover,
+.input-with-icon input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.08);
+  transform: scale(1.1);
+}
+
+/* High visibility in Dark Mode */
+[data-theme='dark'] .input-with-icon input[type="date"],
+[data-theme='dark'] .input-with-icon input[type="time"],
+.dark-theme .input-with-icon input[type="date"],
+.dark-theme .input-with-icon input[type="time"] {
+  color-scheme: dark !important;
+}
+
+[data-theme='dark'] .input-with-icon input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme='dark'] .input-with-icon input[type="time"]::-webkit-calendar-picker-indicator,
+.dark-theme .input-with-icon input[type="date"]::-webkit-calendar-picker-indicator,
+.dark-theme .input-with-icon input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: none !important;
+  opacity: 0.92;
+}
+
+[data-theme='dark'] .input-with-icon input[type="date"]::-webkit-calendar-picker-indicator:hover,
+[data-theme='dark'] .input-with-icon input[type="time"]::-webkit-calendar-picker-indicator:hover,
+.dark-theme .input-with-icon input[type="date"]::-webkit-calendar-picker-indicator:hover,
+.dark-theme .input-with-icon input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.6)) !important;
+  background-color: rgba(245, 158, 11, 0.25);
+  transform: scale(1.15);
 }
 
 /* Select Option Dropdown Fix */
@@ -424,4 +477,46 @@
 
 .booking-reset-btn:hover {
   background: rgba(0, 0, 0, 0.05);
+}
+
+/* Mobile & Tablet Responsive Enhancements */
+@media (max-width: 768px) {
+  .modern-res-wrapper {
+    padding: 1rem 0.75rem 2.5rem 0.75rem;
+  }
+
+  .booking-form-box,
+  .booking-success-card,
+  .res-card-glass {
+    padding: 1.25rem 1rem;
+    border-radius: 14px;
+  }
+
+  .res-page-title {
+    font-size: 1.45rem;
+  }
+
+  .res-page-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .form-legend {
+    font-size: 1.1rem;
+    margin-bottom: 1.2rem;
+  }
+}
+
+@media (max-width: 540px) {
+  .preview-row-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .zone-selector-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-success-card h2 {
+    font-size: 1.35rem;
+  }
 }

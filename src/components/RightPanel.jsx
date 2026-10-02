@@ -11,9 +11,14 @@ const RightPanel = ({ onNavigateToMenu }) => {
   const [loadingOffers, setLoadingOffers] = useState(false);
 
   useEffect(() => {
-    async function loadCategoryCards() {
+    let isMounted = true;
+
+    async function loadRightPanelMenu() {
+      setLoadingPopularItems(true);
       try {
         const data = await getMenuItems();
+        if (!isMounted) return;
+
         if (Array.isArray(data) && data.length > 0) {
           const cards = data.slice(0, 4).map((item, index) => ({
             id: item.id || index + 1,
@@ -25,38 +30,7 @@ const RightPanel = ({ onNavigateToMenu }) => {
           }));
           setCategoryCards(cards);
           setActiveCategoryIndex(0);
-        } else {
-          setCategoryCards([]);
-        }
-      } catch (err) {
-        console.warn('Failed to load category cards from backend:', err);
-        setCategoryCards([]);
-      }
-    }
 
-    loadCategoryCards();
-  }, []);
-
-  useEffect(() => {
-    if (categoryCards.length === 0) return;
-
-    const interval = setInterval(() => {
-      setActiveCategoryIndex((current) => (current + 1) % categoryCards.length);
-    }, 2500);
-
-    return () => clearInterval(interval);
-  }, [categoryCards.length]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadPopularItems() {
-      setLoadingPopularItems(true);
-      try {
-        const data = await getMenuItems();
-        if (!isMounted) return;
-
-        if (Array.isArray(data) && data.length > 0) {
           const formatted = data.slice(0, 3).map((item, index) => ({
             id: item.id || index + 1,
             title: item.title || 'Menu Item',
@@ -66,17 +40,21 @@ const RightPanel = ({ onNavigateToMenu }) => {
           }));
           setPopularItems(formatted);
         } else {
+          setCategoryCards([]);
           setPopularItems([]);
         }
       } catch (err) {
-        console.warn('Failed to load popular items:', err);
-        if (isMounted) setPopularItems([]);
+        console.warn('Failed to load menu data in RightPanel:', err);
+        if (isMounted) {
+          setCategoryCards([]);
+          setPopularItems([]);
+        }
       } finally {
         if (isMounted) setLoadingPopularItems(false);
       }
     }
 
-    loadPopularItems();
+    loadRightPanelMenu();
     return () => {
       isMounted = false;
     };
@@ -195,7 +173,7 @@ const RightPanel = ({ onNavigateToMenu }) => {
           ) : popularItems.length > 0 ? (
             popularItems.map((item) => (
               <div key={item.id} className="popular-item-card">
-                <img src={item.image} alt={item.title} className="item-img" />
+                <img src={item.image} alt={item.title} className="item-img" loading="lazy" decoding="async" />
                 <div className="item-info">
                   <span className="item-title">{item.title}</span>
                   <div className="item-rating-row">
